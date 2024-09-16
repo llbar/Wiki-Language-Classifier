@@ -1,36 +1,69 @@
-### Usage documentation:
-
-2 entry points cmd: (everything is in same file so pretty basic):
-
-train <examples> <hypothesisOut> <learning-type> should read in labeled examples and perform some sort of training.
--examples is a file containing labeled examples.
--hypothesisOut specifies the file name to write model to.
--learning-type specifies the type of learning algorithm to run, it is either "dt" or "ada".
-
-predict <hypothesis> <file> Classify each line as either English or Dutch using the specified model. Note that this must not do any training, but should take a model and make a prediction about the input. For each input example, it should simply print its predicted label on a newline. It should not print anything else.
--hypothesis is a trained decision tree or ensemble created by train program
--file is a file containing lines of 15 word sentence fragments in either English or Dutch.
-
-### Train/Test Data format:
-
-Train:
-<label>|<data>
-example:
-en|description languages. In 2005, the 1985 paper in which the Yale shooting scenario was first 
-nl|zijn de loketten van dit station gesloten en is het een stopplaats geworden. Voor de 
-en|tuples. A decision tree is a flow-chart-like structure, where each internal (non-leaf) node denotes a 
-en|effect is that alive changes value (since alive was true before, this corresponds to alive 
-en|decision trees due to their added sparsity, permit non-greedy learning methods and monotonic constraints to 
-en|of occlusion, which formalizes the â€œpermission to changeâ€ for a fluent. The effect of an 
-en|one implication involved.) A solution proposed by Erik Sandewall was to include a new condition 
-
-Test:
-<data>
-example:
-be imposed. Decision tree learning is the construction of a decision tree from class-labeled training 
-decision tree, so that every internal node has exactly 1 leaf node and exactly 1 
-werd het dienstgebouw opgetrokken, dat zich eveneens onder een schilddak bevindt, langs de straatzijde verspringend 
-internal node as a child (except for the bottommost node, whose only child is a 
-of shooting are correctly formalized. (Predicate completion is more complicated when there is more than 
-beperken, zorgde de NMBS in 2004 voor 60 extra parkeerplaatsen aan het station van Duffel. 
-root node. There are many specific decision-tree algorithms. Notable ones include: While the Yale shooting 
+Language Classification
+Lachlan Bartle
+Feature Selection:
+The features I chose to obtain for classification were obtained by looking at common
+words in each language from the sample train.dat and the English and Dutch Wikipedia
+provided in the project page. The selected features include:
+Average Word Length (av-len):
+Gets the average length of words in a line, categorized into three ranges - short (0-4),
+medium (5-8), and long (8 or more).
+Common Words: Indicates whether specific words ("het", "een", "en", "de", "the", "and",
+"in", "of") are present in the line.
+I chose these features because they help to determine the language the input is in
+because Dutch words and English words have different average lengths, and most
+Dutch/English statements contains certain distinct function words.
+Decision Tree:
+Decision Tree Node:
+The Node class represents a single node in the decision tree. It contains information
+about the node's value, whether it is a leaf node, and its children.
+Entropy:
+Entropy is computed to measure impurity in the dataset. The function calculates the
+entropy of a set of examples using the formula: −∑i(pi*log2(pi))
+Information Gain: Information gain is calculated for each feature, indicating the
+reduction in entropy after the split. The feature with the maximum gain is chosen for
+splitting.
+Tree Construction:
+The dec_tree function recursively constructs the decision tree using a top-down,
+recursive approach. It uses information gain for feature selection and stops building the
+tree when the specified maximum depth is reached.
+Max Depth:
+To avoid overfitting, a maximum depth parameter is used during tree construction. If the
+depth is set to 1, the algorithm creates leaf nodes based on the plurality value of the
+examples. I have the depth set to 20 in my code. If the depth was too low then it may not
+catch underlying patterns in the data and underfit whereas if the tree was too deep then
+it could overfit by including noise and outliers on the data memorization. (overfitting
+would lead to issues on unseen data beyond the training data).
+Testing Decision Tree:
+The testing process involves classifying instances based on the trained decision tree,
+and the results are printed. I tested depth lower and higher and had to find a nice spot in
+the middle to get accuracy.
+AdaBoost:
+Weighted Instances:
+The WeightedInstance class represents a weighted set of instances. The weights are
+adjusted during the training process to focus on misclassified instances.
+AdaBoost Training:
+The AdaBoost algorithm is implemented in the AdaBoost class. Key features include:
+Weighted Sample Handling:
+The weights of instances are updated based on misclassifications, and the
+sample is normalized to ensure proper weight distribution.
+Ensemble Size:
+The train method specifies the ensemble size. Generally, a higher ensemble size,
+the better the performance of the model because the weak learner concentrates
+on correcting the priors one’s mistakes, which can lead to more accuracy.
+However, optimal ensemble size depends on the dataset’s characteristics
+because there is a trade-off between model complexity and generalization.
+Voting:
+The vote method classifies instances by aggregating votes from the ensemble,
+considering the weight of each decision tree.
+Testing AdaBoost:
+The testing process involves classifying instances based on the ensemble of decision
+trees, and the results are printed. I found that changing the max depth in dec_tree for the
+stumps in Adaboost helped it become more accurate. I decided to leave it at 3.
+Files and Main:
+Training and Prediction:
+The train function handles training for both decision tree and AdaBoost models based on
+the specified learning type. The predict function loads a trained model and performs
+predictions on test instances.
+Command Line:
+The main function is the entry point and processes the command-line arguments to
+execute either the training or prediction functionality.
